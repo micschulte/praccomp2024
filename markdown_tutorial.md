@@ -39,3 +39,8 @@ Ordered
 3. Item 3
 	* Item 3a
 	* Item 3b
+
+## IMAGES
+![shrimp](https://www.creolecontessa.com/wp-content/uploads/2014/08/creole-fried-shrimp-2.jpg)
+
+Format: \![Alt text](url)
