@@ -43,4 +43,14 @@ Ordered
 ## IMAGES
 ![shrimp](https://www.creolecontessa.com/wp-content/uploads/2014/08/creole-fried-shrimp-2.jpg)
 
-Format: \![Alt text](url)
+Format: \!\[Alt text\](url\)
+
+## LINKS
+
+http://brewerlab.net
+
+[Brewer Lab](http://brewerlab.net)
+
+## BACKSLASH ESCAPES
+
+\*Literal asterisks\*
