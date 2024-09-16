@@ -74,3 +74,21 @@ print("Hello")
 ```r
 x <- 4^2
 ```
+
+## TASK LISTS
+
+- [ ] This is an incomplete task
+- [x] This is a complete task
+- [x] @mentions, #refs, [links](), **formatting**, and <del>tags</del> supported
+- [x] list syntax required (any unordered or ordered list supported)
+
+## TABLES
+
+First Header | Second Header
+------------ | -------------
+Content cell 1 | Content cell 2
+Content column 1 | Content column 2
+
+## Emoji
+
+:shrimp:
