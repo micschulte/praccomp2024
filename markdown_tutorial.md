@@ -18,6 +18,8 @@ __This text is also bolded__
 
 _You **can** combine them_
 
+~This text is stricken~
+
 ## BLOCKQUOTES
 
 _My poem_ by Mic Schulte 
@@ -92,3 +94,4 @@ Content column 1 | Content column 2
 ## Emoji
 
 :shrimp:
+
