@@ -1,0 +1,192 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-11-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# **Fall 2024 PracComp Project**
+
+## *Petrolisthes armatus* data analysis
+
+```{r Loading libraries, include = FALSE}
+library(maps)
+library(ggplot2)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgbif)
+library(terra)
+library(geodata)
+library(sdmpredictors)
+library(stringr)
+library(raster)
+library(ggspatial)
+library(stars)
+library(elevatr)
+library(tigris)
+library(ggsflabel)
+library(data.table)
+library(readxl)
+library(ggrepel)
+library(dplyr)
+```
+
+```{r Read in data, include = FALSE}
+petro <- read_excel("~/Desktop/R/in_progress/mock_petro_dataset.xlsx")
+```
+
+### Geospatial mapping
+```{r}
+# Get state boundaries from rnaturalearth
+petro_sites_states <- ne_states(country = "united states of america", returnclass = "sf")
+
+# Filter data to retain unique site locations
+site_locations <- petro %>%
+  dplyr::select(site_id, latitude, longitude) %>%
+  distinct()
+
+# Incorporate coordinates from dataset
+site_locations$site_id <- as.factor(site_locations$site_id)
+```
+
+```{r, fig.width=10, fig.height=8}
+# Plot non-native range map & sites as points
+ggplot() +
+  geom_rect(aes(xmin = -86, xmax = -74, ymin = 22, ymax = 38), fill = "lightblue", color = NA) +
+  geom_sf(data = petro_sites_states, fill = "gray85", color = "black", size = 0.3) +
+  coord_sf(xlim = c(-82, -76), ylim = c(27, 35)) +
+  geom_point(data = site_locations, aes(x = longitude, y = latitude, color = site_id), size = 3) +
+  scale_color_manual(values = c("PKS" = "#b5302b", "CHS" = "#e77431", 
+                               "SKD" = "#503431", "JAX" = "#55a393", 
+                               "HBOI" = "#4b6c57")) +
+  geom_text_repel(data = site_locations, aes(x = longitude, y = latitude, label = site_id),
+                  box.padding = 1, point.padding = 0.15, 
+                  nudge_y = -0.10, nudge_x = 0.4, 
+                  direction = "both", 
+                  segment.color = 'grey50') +
+  labs(title = ("Sites along the non-native range of green porcelain crabs"),
+       x = "Longitude", y = "Latitude") +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "br", which_north = "true",
+                         style = north_arrow_fancy_orienteering) +
+  theme_minimal() +
+  theme()
+```
+
+### Infection prevalence (geom_bar)
+```{r}
+petro$site_id <- factor(petro$site_id, levels = c("PKS", "CHS", "SKD", "JAX", "HBOI"))
+
+# Calculate bopyrid infection prevalence by site
+prevalence_by_site <- petro %>%
+  group_by(site_id) %>%
+  summarise(prevalence = sum(inf_status == 1) / n())
+
+# Plot of infection prevalence by site
+ggplot(prevalence_by_site, aes(x = site_id, y = prevalence, fill = site_id)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("PKS" = "#b5302b", "CHS" = "#e77431", 
+                               "SKD" = "#503431", "JAX" = "#55a393", 
+                               "HBOI" = "#4b6c57")) +
+  labs(title = "Bopyrid infection prevalence by site",
+       x = "Site",
+       y = "Infection prevalence") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+### Mapping the prevalence
+```{r}
+site_locations <- site_locations %>%
+  left_join(prevalence_by_site, by = "site_id")
+
+# Plot non-native range map & sites as points with prevalence indicated by color intensity
+ggplot() +
+  geom_rect(aes(xmin = -86, xmax = -74, ymin = 22, ymax = 38), fill = "lightblue", color = NA) +
+  geom_sf(data = petro_sites_states, fill = "gray85", color = "black", size = 0.3) +
+  coord_sf(xlim = c(-82, -76), ylim = c(27, 35)) +
+  geom_point(data = site_locations, aes(x = longitude, y = latitude, color = prevalence), size = 5) +
+  scale_color_gradient(low = "white", high = "#b5302b", name = "Infection Prevalence") +
+  geom_text_repel(data = site_locations, aes(x = longitude, y = latitude, label = site_id),
+                  box.padding = 1, point.padding = 0.15, 
+                  nudge_y = -0.10, nudge_x = 0.4, 
+                  direction = "both", 
+                  segment.color = 'grey50') +
+  labs(title = "Bopyrid infection prevalence by site",
+       x = "Longitude", y = "Latitude") +
+  annotation_scale(location = "bl", width_hint = 0.3) +
+  annotation_north_arrow(location = "br", which_north = "true",
+                         style = north_arrow_fancy_orienteering) +
+  theme_minimal() +
+  theme()
+```
+
+### Sex ratios by site
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Sex ratio by site
+sex_ratio <- petro %>%
+  filter(sex != "J") %>%
+  group_by(site_id, sex) %>%
+  summarise(count = n()) %>%
+  mutate(proportion = count / sum(count))
+
+# Plot the sex ratio by site as a stacked bar plot
+ggplot(sex_ratio, aes(x = site_id, y = proportion, fill = sex)) +
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_fill_manual(values = c("F" = "#b5302b", "M" = "#55a393", "O" = "#e77431")) +
+  labs(title = "Green porcelain crab sex ratios by site",
+       x = "Site",
+       y = "Proportion of each sex",
+       fill = "Sex") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+# Filter for female crabs only
+female_crabs <- petro %>%
+  filter(sex %in% c("F", "O"))
+
+# Calculate proportion of ovigerous (sex = "O") crabs by site
+ovigerous_proportion <- female_crabs %>%
+  group_by(site_id) %>%
+  summarise(total_females = n(),
+    ovigerous_count = sum(sex == "O"),
+    proportion_ovigerous = ovigerous_count / total_females)
+
+# Plot the proportion of ovigerous female crabs by site
+ggplot(ovigerous_proportion, aes(x = site_id, y = proportion_ovigerous, fill = site_id)) +
+  geom_bar(stat = "identity") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  labs(title = "Proportion of ovigerous porcelain crabs by site",
+       x = "Site",
+       y = "Proportion of Ovigerous Females",
+       fill = "Site") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+### Linear model of body size measurements (carapace length ~ carapace width) by sex
+```{r, fig.width=10, fig.height=8}
+# Define colors for each sex
+sex_colors <- c("F" = "darkorchid4", "M" = "dodgerblue", "O" = "gold")
+
+# Plot carapace length (cl_mm) vs. carapace width (cw_mm), colored by sex
+plot(petro$cl_mm ~ petro$cw_mm, col = sex_colors[petro$sex], pch = 16,
+     xlab = "carapace width (mm)", ylab = "carapace length (mm)")
+
+# Add abline to lm
+petro_size_lm <- lm(petro$cl_mm ~ petro$cw_mm)
+abline(petro_size_lm)
+
+# Add a legend to indicate colors for each sex
+legend("bottomright", legend = names(sex_colors), col = sex_colors, pch = 16, title = "Sex")
+```
