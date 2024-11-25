@@ -185,8 +185,37 @@ plot(petro$cl_mm ~ petro$cw_mm, col = sex_colors[petro$sex], pch = 16,
 
 # Add abline to lm
 petro_size_lm <- lm(petro$cl_mm ~ petro$cw_mm)
+coef(petro_size_lm)
 abline(petro_size_lm)
 
 # Add a legend to indicate colors for each sex
 legend("bottomright", legend = names(sex_colors), col = sex_colors, pch = 16, title = "Sex")
 ```
+
+
+# Histogram of ovigerous and non-ovigerous porcelain crab size by site
+```{r}
+female_crabs <- petro %>%
+  filter(sex == "F" | sex == "O")
+
+# Plot histogram
+ggplot(female_crabs, aes(x = cw_mm, fill = sex)) +
+  geom_histogram(binwidth = 1, color = "black", position = "stack") +
+  facet_wrap(~ site_id, ncol = 3, scales = "free_x") +
+  scale_fill_manual(
+    values = c("F" = "darkorchid", "O" = "gold"),
+  ) +
+  labs(
+    x = "Carapace width (mm)",
+    y = "Count of female crabs",
+    title = "Distribution of ovigerous & non-ovigerous porcelain crabs by carapace width (mm)"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = 10),
+    panel.grid = element_blank(),
+    panel.spacing = unit(1.5, "lines")
+  )
+```
+
+
