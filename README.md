@@ -2,10 +2,10 @@
 ## Fall Semester 2024
 ### Markdown Basics
 - Bulletpoint
-	- Subbulletpoint
+	Subbulletpoint
 
-1. Numerical List
-2. Numerical List 2
+1 Numerical List
+2 Numerical List 2
 
 [ ] Open check
 [x] Checked
@@ -14,13 +14,10 @@ Unformatted text
 - Text formatting
 	- _Spider_
 	- __Spider__
-	- __*Spider*__
+	- _*Spider*_
 	- ~Spider~
 
 | Obs | Value |
 | --- | ----- |
 | A   | 0.5   |
 | B   | 0.7   |
-
-### Final Project
-
