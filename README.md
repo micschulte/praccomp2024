@@ -14,10 +14,12 @@ Unformatted text
 - Text formatting
 	- _Spider_
 	- __Spider__
-	- _*Spider*_
+	- __*Spider*__
 	- ~Spider~
 
 | Obs | Value |
 | --- | ----- |
 | A   | 0.5   |
 | B   | 0.7   |
+
+### Final Project
